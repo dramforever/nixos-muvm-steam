@@ -1,3 +1,5 @@
+# https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/mu/muvm/package.nix
+# But I bumped it to a Git version
 {
   bashInteractive,
   config,
