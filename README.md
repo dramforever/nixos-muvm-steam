@@ -10,6 +10,12 @@ This repository contains a Nix Flake. To use it, use the following flake URL:
 github:dramforever/nixos-muvm-steam
 ```
 
+## Non-flake usage
+
+```nix
+import ./path/to/nixos-muvm-steam { pkgs = /* ... */; }
+```
+
 ## What is this?
 
 A wrapper script for the muvm+FEX stack to run Steam and Steam games on Asahi Linux NixOS.
