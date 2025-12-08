@@ -4,9 +4,8 @@
   outputs =
     { self, nixpkgs }:
     {
-      packages.aarch64-linux = nixpkgs.lib.packagesFromDirectoryRecursive {
-        inherit (nixpkgs.legacyPackages.aarch64-linux) callPackage newScope;
-        directory = ./packages;
+      packages.aarch64-linux = import ./. {
+        pkgs = nixpkgs.legacyPackages.aarch64-linux;
       };
     };
 }
