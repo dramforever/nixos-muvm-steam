@@ -1,5 +1,4 @@
-# https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/mu/muvm/package.nix
-# But I bumped it to a Git version
+# https://github.com/normalcea/nixpkgs/blob/muvm-update-to-0.5.0/pkgs/by-name/mu/muvm/package.nix
 {
   lib,
   stdenv,
@@ -11,15 +10,11 @@
   systemd,
   udev,
   pkg-config,
-  procps,
   fex,
   writeShellApplication,
   coreutils,
   makeBinaryWrapper,
-# TODO: Enable again when sommelier is not broken.
-# For now, don't give false impression of sommelier being supported.
-# sommelier,
-# withSommelier ? false,
+  nix-update-script,
 }:
 let
   # TODO: Setup setuid wrappers.
@@ -30,47 +25,46 @@ let
       coreutils
     ];
     text = ''
-      if [[ ! -f /etc/NIXOS ]]; then exit; fi
-
-      ln -s /run/muvm-host/run/current-system /run/current-system
-      # Only create the symlink if that path exists on the host and is a directory.
-      if [[ -d /run/muvm-host/run/opengl-driver ]]; then ln -s /run/muvm-host/run/opengl-driver /run/opengl-driver; fi
+      if [[ -f /etc/NIXOS ]]; then
+        ln -s /run/muvm-host/run/current-system /run/current-system
+        if [[ -d /run/muvm-host/run/opengl-driver ]]; then
+           ln -s /run/muvm-host/run/opengl-driver /run/opengl-driver
+        fi
+      fi
     '';
   };
-  binPath = [
-    dhcpcd
-    passt
-    (placeholder "out")
-  ]
-  ++ lib.optionals stdenv.hostPlatform.isAarch64 [ fex ];
   wrapArgs = lib.escapeShellArgs [
     "--prefix"
     "PATH"
     ":"
-    (lib.makeBinPath binPath)
+    (lib.makeBinPath (
+      [
+        dhcpcd
+        passt
+        (placeholder "out")
+      ]
+      ++ lib.optionals stdenv.hostPlatform.isAarch64 [ fex ]
+    ))
     "--add-flags"
     "--execute-pre=${lib.getExe initScript}"
   ];
 in
-rustPlatform.buildRustPackage rec {
+rustPlatform.buildRustPackage (finalAttrs: {
   pname = "muvm";
-  version = "0.4.1-unstable-2025-11-14";
+  version = "0.5.0";
 
   src = fetchFromGitHub {
     owner = "AsahiLinux";
     repo = "muvm";
-    rev = "51c3960cb148d5024e2b3eb6027bc068fbe5e04f";
-    hash = "sha256-MD794HhR41dWYmzzqmSOgQvHKSVhu5tAIJs7Utlma/Y=";
+    tag = "muvm-${finalAttrs.version}";
+    hash = "sha256-k3Jj/Tzu5ZfnADMiVG7pAPqosrkZvhmehi0NMbyudN0=";
   };
 
-  cargoHash = "sha256-Le7dOddGpyysq0TbVLCcMMYeMBf7dNnbN7n+bYBPFKo=";
+  cargoHash = "sha256-jFNyQD2Hf1K5+wHDRD2WG70IJfZbL+hT/gtjeUnt5Mk=";
 
   postPatch = ''
     substituteInPlace crates/muvm/src/guest/bin/muvm-guest.rs \
       --replace-fail "/usr/lib/systemd/systemd-udevd" "${systemd}/lib/systemd/systemd-udevd"
-
-    substituteInPlace crates/muvm/src/monitor.rs \
-      --replace-fail "/sbin/sysctl" "${lib.getExe' procps "sysctl"}"
   ''
   # Only patch FEX path if we're aarch64, otherwise we don't want the derivation to pull in FEX in any way
   + lib.optionalString stdenv.hostPlatform.isAarch64 ''
@@ -97,6 +91,10 @@ rustPlatform.buildRustPackage rec {
     wrapProgram $out/bin/muvm ${wrapArgs}
   '';
 
+  passthru = {
+    updateScript = nix-update-script { };
+  };
+
   meta = {
     description = "Run programs from your system in a microVM";
     homepage = "https://github.com/AsahiLinux/muvm";
@@ -108,4 +106,4 @@ rustPlatform.buildRustPackage rec {
     inherit (libkrun.meta) platforms;
     mainProgram = "muvm";
   };
-}
+})
