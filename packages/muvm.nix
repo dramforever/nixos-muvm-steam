@@ -1,4 +1,3 @@
-# https://github.com/normalcea/nixpkgs/blob/muvm-update-to-0.5.0/pkgs/by-name/mu/muvm/package.nix
 {
   lib,
   stdenv,
@@ -7,6 +6,7 @@
   libkrun,
   passt,
   dhcpcd,
+  socat,
   systemd,
   udev,
   pkg-config,
@@ -41,6 +41,7 @@ let
       [
         dhcpcd
         passt
+        socat
         (placeholder "out")
       ]
       ++ lib.optionals stdenv.hostPlatform.isAarch64 [ fex ]
