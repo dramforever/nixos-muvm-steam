@@ -35,7 +35,7 @@ A wrapper script for the muvm+FEX stack to run Steam and Steam games on Asahi Li
 
 ## What's working and what's not
 
-- [X] muvm (Git version for a small fix)
+- [X] muvm (0.5.0)
 - [X] FEX (upstream Nixpkgs)
 - [X] Mesa (upstream Nixpkgs)
 - [X] Steam (PulseAudio workaround)
