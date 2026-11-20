@@ -24,7 +24,7 @@ let
     echo 1 > /proc/sys/kernel/print-fatal-signals
     echo enable-shm=no > /run/pulse.conf
     echo "Run steam with:"
-    echo "  PULSE_CLIENTCONFIG=/run/pulse.conf /run/steam-run-free /path/to/steam"
+    echo "  PULSE_CLIENTCONFIG=/run/pulse.conf dbus-run-session /run/steam-run-free /path/to/steam"
     echo
   '';
 in
